@@ -73,15 +73,3 @@ docker compose up --build
 | Startup Default | ✅ | ✅ | ❌ | — |
 | Health Strict | ✅ | ✅ | ✅ | patient, diagnosis, treatment, medication, medical record |
 | Enterprise Confidential | ✅ | ✅ | ❌ | confidential, proprietary, trade secret, internal only, restricted |
-
-## API Endpoints
-
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| POST | /api/auth/login | — | Login, returns JWT |
-| POST | /api/scan | User | Scan a prompt |
-| GET | /api/policies | User | List policies |
-| POST | /api/policies | Admin | Create policy |
-| PUT | /api/policies/:id | Admin | Update policy |
-| GET | /api/analytics/summary | Admin | Dashboard summary |
-| GET | /api/analytics/timeline | Admin | Risk over time |

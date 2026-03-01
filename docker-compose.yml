@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: safeprompt
+      POSTGRES_PASSWORD: safeprompt_dev
+      POSTGRES_DB: safeprompt
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U safeprompt" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://safeprompt:safeprompt_dev@postgres:5432/safeprompt
+      JWT_SECRET: dev-jwt-secret-change-in-production
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODELS: gemini-2.5-flash,gemini-2.0-flash,gemini-1.5-flash,gemini-2.0-flash-lite
+      PORT: "3000"
+      NODE_ENV: development
+      CORS_ORIGIN: http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:3000
+
+volumes:
+  postgres_data:

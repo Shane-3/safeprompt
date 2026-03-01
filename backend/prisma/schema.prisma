@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model User {
+  id           String      @id @default(cuid())
+  email        String      @unique
+  passwordHash String
+  role         Role        @default(USER)
+  createdAt    DateTime    @default(now())
+
+  scanEvents   ScanEvent[]
+}
+
+model Policy {
+  id               String      @id @default(cuid())
+  name             String      @unique
+  blockSecrets     Boolean     @default(true)
+  warnOnPII        Boolean     @default(true)
+  strictHealthTerms Boolean    @default(false)
+  customKeywords   String[]    @default([])
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  scanEvents       ScanEvent[]
+}
+
+model ScanEvent {
+  id         String    @id @default(cuid())
+  promptHash String
+  riskLevel  RiskLevel
+  categories String[]
+  policyId   String
+  userId     String
+  createdAt  DateTime  @default(now())
+
+  policy     Policy    @relation(fields: [policyId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@index([policyId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([riskLevel])
+}

@@ -116,7 +116,7 @@ describe("MaskingService", () => {
     });
 
     it("handles overlapping entities by keeping the first non-overlapping spans", () => {
-        // Simulate two entities where one overlaps another
+        // Overlapping match resolution
         const entities: DetectedEntity[] = [
             { type: "email", value: "john@test.com", position: 0 },
             { type: "custom_keyword", value: "john", position: 0 },
@@ -125,7 +125,7 @@ describe("MaskingService", () => {
             originalPrompt: "john@test.com is here",
             detectedEntities: entities,
         });
-        // The longer match (email) should win
+        // Verify longest match behavior
         expect(result.maskedPrompt).toBe("[EMAIL] is here");
     });
 

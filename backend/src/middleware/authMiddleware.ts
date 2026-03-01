@@ -2,10 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../utils/jwt";
 import type { Role } from "../models/types";
 
-/**
- * Middleware: verify JWT from the Authorization header and attach
- * the decoded payload to `req.user`.
- */
+// Authenticate JWT
 export function authenticate(
     req: Request,
     res: Response,
@@ -37,10 +34,7 @@ export function authenticate(
     }
 }
 
-/**
- * Middleware factory: restrict access to users with a specific role.
- * Must be used AFTER `authenticate`.
- */
+// Restrict access by role
 export function requireRole(role: Role) {
     return (req: Request, res: Response, next: NextFunction): void => {
         if (!req.user || req.user.role !== role) {

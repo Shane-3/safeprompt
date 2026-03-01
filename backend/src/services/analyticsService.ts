@@ -6,9 +6,7 @@ import type {
 
 const prisma = new PrismaClient();
 
-/**
- * Return aggregate summary: total scans, risk distribution, top categories.
- */
+// Get aggregate summary
 export async function getSummary(): Promise<AnalyticsSummary> {
     // Total scans
     const totalScans = await prisma.scanEvent.count();
@@ -44,9 +42,7 @@ export async function getSummary(): Promise<AnalyticsSummary> {
     return { totalScans, riskDistribution, topCategories };
 }
 
-/**
- * Return daily-bucketed risk counts for the given date range.
- */
+// Get risk counts timeline
 export async function getTimeline(
     startDate?: string,
     endDate?: string

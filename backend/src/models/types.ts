@@ -9,7 +9,6 @@ export enum RiskLevel {
     HIGH = "HIGH",
 }
 
-// ── Scan ────────────────────────────────────────────────
 
 export interface ScanRequest {
     prompt: string;
@@ -30,7 +29,6 @@ export interface ScanResponse {
     suggestedRewrite: string | null;
 }
 
-// ── Masking ─────────────────────────────────────────────
 
 export interface MaskingInput {
     originalPrompt: string;
@@ -41,7 +39,6 @@ export interface MaskingOutput {
     maskedPrompt: string;
 }
 
-// ── Policy ──────────────────────────────────────────────
 
 export interface PolicyDTO {
     id: string;
@@ -70,7 +67,6 @@ export interface UpdatePolicyInput {
     customKeywords?: string[];
 }
 
-// ── Analytics ───────────────────────────────────────────
 
 export interface RiskDistribution {
     LOW: number;
@@ -96,7 +92,6 @@ export interface TimelineDataPoint {
     HIGH: number;
 }
 
-// ── Auth ────────────────────────────────────────────────
 
 export interface LoginRequest {
     email: string;
@@ -120,7 +115,6 @@ export interface JwtPayload {
     role: Role;
 }
 
-// ── Error ───────────────────────────────────────────────
 
 export interface ErrorResponse {
     error: string;
@@ -129,7 +123,6 @@ export interface ErrorResponse {
     timestamp: string;
 }
 
-// ── Express extension ───────────────────────────────────
 
 declare global {
     namespace Express {

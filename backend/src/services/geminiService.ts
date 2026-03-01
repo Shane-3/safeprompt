@@ -1,7 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { DetectedEntity } from "../models/types";
 
-// ── Safety patterns ─────────────────────────────────────
 
 const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
 const SECRET_PATTERNS = [
@@ -24,7 +23,6 @@ const SYSTEM_INSTRUCTION =
 const GENERIC_FALLBACK =
     "Rewrite your prompt without including personal or confidential data.";
 
-// ── Default model cascade (best free-tier models, ordered by preference) ──
 
 const DEFAULT_MODELS = [
     "gemini-2.5-flash",
@@ -33,10 +31,7 @@ const DEFAULT_MODELS = [
     "gemini-2.0-flash-lite",
 ];
 
-/**
- * Parse the model list from GEMINI_MODELS env var (comma-separated)
- * or fall back to GEMINI_MODEL (single) or the default cascade.
- */
+// Parse model list from environment
 function getModelCascade(): string[] {
     const modelsEnv = process.env.GEMINI_MODELS;
     if (modelsEnv) {
@@ -54,11 +49,8 @@ function getModelCascade(): string[] {
     return DEFAULT_MODELS;
 }
 
-// ── Rate-limit detection ────────────────────────────────
 
-/**
- * Check if an error is a rate-limit (HTTP 429) or quota-exhausted error.
- */
+// Check if rate-limit error
 function isRateLimitError(error: unknown): boolean {
     if (error instanceof Error) {
         const msg = error.message.toLowerCase();
@@ -73,14 +65,8 @@ function isRateLimitError(error: unknown): boolean {
     return false;
 }
 
-// ── Safety guard ────────────────────────────────────────
 
-/**
- * Pre-send safety check: ensure `maskedPrompt` contains no residual
- * sensitive data before it reaches the external LLM.
- *
- * Returns `true` if the prompt is safe to send.
- */
+// Pre-send safety guard
 function isSafeToSend(
     maskedPrompt: string,
     detectedEntities: DetectedEntity[]
@@ -112,41 +98,24 @@ function isSafeToSend(
     return true;
 }
 
-// ── Gemini rewrite ──────────────────────────────────────
 
-/**
- * Rewrite a **masked** prompt using Google Gemini.
- *
- * Tries each model in the cascade. If a model hits a rate limit (429),
- * it automatically falls through to the next model. This ensures
- * free-tier limits are maximized across multiple models.
- *
- * This function NEVER receives the original raw prompt.
- * A pre-send safety guard validates the input before any API call.
- *
- * @param maskedPrompt     - The prompt with sensitive spans already replaced by tokens
- * @param detectedEntities - The entities that were masked (used for safety guard)
- * @param policyContext    - Human-readable policy summary for the LLM
- */
+// Rewrite masked prompt using Gemini
 export async function rewriteWithGemini(
     maskedPrompt: string,
     detectedEntities: DetectedEntity[],
     policyContext: string
 ): Promise<string> {
-    // ── Safety guard ────────────────────────────────────
     if (!isSafeToSend(maskedPrompt, detectedEntities)) {
         console.warn("[GeminiService] Safety guard triggered — returning generic fallback");
         return GENERIC_FALLBACK;
     }
 
-    // ── API key check ───────────────────────────────────
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey || apiKey === "your-gemini-api-key-here") {
         return fallbackRewrite(maskedPrompt);
     }
 
-    // ── Try each model in the cascade ───────────────────
     const models = getModelCascade();
     const genAI = new GoogleGenerativeAI(apiKey);
     const prompt = `Sanitized prompt: ${maskedPrompt}\nPolicy context: ${policyContext}`;
@@ -188,16 +157,11 @@ export async function rewriteWithGemini(
     return fallbackRewrite(maskedPrompt);
 }
 
-// ── Fallback ────────────────────────────────────────────
 
-/**
- * Simple fallback that returns the already-masked prompt as the rewrite.
- * Since masking has already been applied, this is safe.
- */
+// Returns masked prompt as fallback rewrite
 function fallbackRewrite(maskedPrompt: string): string {
     return maskedPrompt;
 }
 
-// ── Exported for testing ────────────────────────────────
 
 export { isSafeToSend as _isSafeToSend };

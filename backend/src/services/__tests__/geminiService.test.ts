@@ -15,7 +15,7 @@ describe("GeminiService — Safety Guard", () => {
         const entities: DetectedEntity[] = [
             { type: "email", value: "john@test.com", position: 6 },
         ];
-        // Simulate a masking failure — raw value is still present
+        // Simulate masking failure
         const maskedPrompt = "Email john@test.com please";
         expect(_isSafeToSend(maskedPrompt, entities)).toBe(false);
     });

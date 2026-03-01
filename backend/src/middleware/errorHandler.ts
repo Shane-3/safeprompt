@@ -1,9 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import type { ErrorResponse } from "../models/types";
 
-/**
- * Custom application error that carries an HTTP status code.
- */
+// Custom application error
 export class AppError extends Error {
     public readonly statusCode: number;
 
@@ -14,10 +12,7 @@ export class AppError extends Error {
     }
 }
 
-/**
- * Centralised error-handling middleware.
- * Converts thrown errors into a uniform JSON response.
- */
+// Centralized error handler
 export function errorHandler(
     err: Error,
     _req: Request,

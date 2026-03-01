@@ -8,7 +8,6 @@ import type {
 
 const prisma = new PrismaClient();
 
-// ── In-memory cache ─────────────────────────────────────
 let policyCache: PolicyDTO[] | null = null;
 
 function invalidateCache(): void {
@@ -37,9 +36,7 @@ function toDTO(p: {
     };
 }
 
-/**
- * List every policy (uses in-memory cache).
- */
+// List all policies
 export async function getAllPolicies(): Promise<PolicyDTO[]> {
     if (policyCache) return policyCache;
 
@@ -51,18 +48,14 @@ export async function getAllPolicies(): Promise<PolicyDTO[]> {
     return result;
 }
 
-/**
- * Get a single policy by ID.
- */
+// Get policy by ID
 export async function getPolicyById(id: string): Promise<PolicyDTO> {
     const row = await prisma.policy.findUnique({ where: { id } });
     if (!row) throw new AppError("Policy not found", 404);
     return toDTO(row);
 }
 
-/**
- * Create a new policy.
- */
+// Create policy
 export async function createPolicy(
     input: CreatePolicyInput
 ): Promise<PolicyDTO> {
@@ -71,9 +64,7 @@ export async function createPolicy(
     return toDTO(row);
 }
 
-/**
- * Update an existing policy.
- */
+// Update policy
 export async function updatePolicy(
     id: string,
     input: UpdatePolicyInput

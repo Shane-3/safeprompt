@@ -8,10 +8,7 @@ import { Role } from "../models/types";
 const prisma = new PrismaClient();
 const SALT_ROUNDS = 10;
 
-/**
- * Authenticate a user by email and password.
- * Returns a signed JWT and the user's public profile.
- */
+// Authenticate user
 export async function login(
     email: string,
     password: string
@@ -44,9 +41,7 @@ export async function login(
     };
 }
 
-/**
- * Hash a plain-text password for storage.
- */
+// Hash password
 export async function hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, SALT_ROUNDS);
 }

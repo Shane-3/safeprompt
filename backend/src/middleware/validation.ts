@@ -1,10 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import type { ZodSchema } from "zod";
 
-/**
- * Middleware factory: validate `req.body` against a Zod schema.
- * Returns 400 with field-level errors if validation fails.
- */
+// Validate body against Zod schema
 export function validate(schema: ZodSchema) {
     return (req: Request, res: Response, next: NextFunction): void => {
         const result = schema.safeParse(req.body);
@@ -30,9 +27,7 @@ export function validate(schema: ZodSchema) {
     };
 }
 
-/**
- * Middleware factory: validate `req.query` against a Zod schema.
- */
+// Validate query against Zod schema
 export function validateQuery(schema: ZodSchema) {
     return (req: Request, res: Response, next: NextFunction): void => {
         const result = schema.safeParse(req.query);

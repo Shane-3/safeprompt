@@ -1,20 +1,17 @@
 import { z } from "zod";
 
-// ── Auth schemas ────────────────────────────────────────
 
 export const loginSchema = z.object({
     email: z.string().email("Invalid email address"),
     password: z.string().min(1, "Password is required"),
 });
 
-// ── Scan schemas ────────────────────────────────────────
 
 export const scanSchema = z.object({
     prompt: z.string().min(1, "Prompt is required"),
     policyId: z.string().min(1, "Policy ID is required"),
 });
 
-// ── Policy schemas ──────────────────────────────────────
 
 export const createPolicySchema = z.object({
     name: z.string().min(1, "Policy name is required"),
@@ -32,7 +29,6 @@ export const updatePolicySchema = z.object({
     customKeywords: z.array(z.string()).optional(),
 });
 
-// ── Analytics schemas ───────────────────────────────────
 
 export const timelineQuerySchema = z.object({
     startDate: z.string().datetime().optional(),

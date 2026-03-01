@@ -1,7 +1,6 @@
 import type { DetectedEntity } from "../models/types";
 import { RiskLevel } from "../models/types";
 
-// ── Regex patterns for PII detection ────────────────────
 
 const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 const PHONE_REGEX =
@@ -10,7 +9,6 @@ const SSN_REGEX = /\b\d{3}-\d{2}-\d{4}\b/g;
 const ADDRESS_REGEX =
     /\d{1,5}\s+(?:[A-Za-z]+\s){1,4}(?:St|Street|Ave|Avenue|Blvd|Boulevard|Dr|Drive|Rd|Road|Ln|Lane|Ct|Court|Pl|Place|Way)\b/gi;
 
-// ── Regex patterns for secret detection ─────────────────
 
 const API_KEY_PATTERNS = [
     /sk-[a-zA-Z0-9]{10,}/g,                            // OpenAI
@@ -27,7 +25,6 @@ const BEARER_TOKEN_REGEX = /Bearer\s+[a-zA-Z0-9._\-]+/gi;
 const PASSWORD_REGEX =
     /(?:password|passwd|pwd|secret)\s*[=:]\s*["']?[^\s"']{4,}/gi;
 
-// ── Business-sensitive keywords ─────────────────────────
 
 const BUSINESS_KEYWORDS = [
     "contract",
@@ -55,7 +52,6 @@ const ESCALATE_TO_HIGH_KEYWORDS = [
     "top secret",
 ];
 
-// ── Health-specific keywords ────────────────────────────
 
 const HEALTH_KEYWORDS = [
     "patient",
@@ -69,7 +65,6 @@ const HEALTH_KEYWORDS = [
     "symptom",
 ];
 
-// ── Detection helpers ───────────────────────────────────
 
 function matchAll(
     text: string,
@@ -77,7 +72,7 @@ function matchAll(
     type: string
 ): DetectedEntity[] {
     const entities: DetectedEntity[] = [];
-    // Clone the regex to reset lastIndex
+    // Reset regex index
     const re = new RegExp(regex.source, regex.flags);
     let match = re.exec(text);
     while (match !== null) {
@@ -112,15 +107,12 @@ function matchKeywords(
     return entities;
 }
 
-// ── Public interface ────────────────────────────────────
 
-/**
- * Remove overlapping entities, keeping the longest match at each position.
- */
+// Deduplicate entities keeping longest match
 function deduplicateEntities(entities: DetectedEntity[]): DetectedEntity[] {
     if (entities.length <= 1) return entities;
 
-    // Sort by position ascending, then by value length descending (longer first)
+    // Sort by position and length
     const sorted = [...entities].sort((a, b) => {
         if (a.position !== b.position) return a.position - b.position;
         return b.value.length - a.value.length;
@@ -131,7 +123,7 @@ function deduplicateEntities(entities: DetectedEntity[]): DetectedEntity[] {
 
     for (const entity of sorted) {
         const entityEnd = entity.position + entity.value.length;
-        // Skip if this entity overlaps with or is contained within a previous one
+        // Skip contained matches
         if (entity.position < lastEnd) {
             continue;
         }
@@ -159,9 +151,7 @@ export interface PolicyConfig {
     customKeywords: string[];
 }
 
-/**
- * Run the full risk detection pipeline on a prompt.
- */
+// Full risk detection pipeline
 export function detectRisks(
     prompt: string,
     policy: PolicyConfig
@@ -169,7 +159,6 @@ export function detectRisks(
     const entities: DetectedEntity[] = [];
     const categories: string[] = [];
 
-    // ── PII ───────────────────────────────────────────
     const piiEntities = [
         ...matchAll(prompt, EMAIL_REGEX, "email"),
         ...matchAll(prompt, PHONE_REGEX, "phone"),
@@ -182,7 +171,6 @@ export function detectRisks(
         categories.push("PII");
     }
 
-    // ── Secrets ───────────────────────────────────────
     let secretEntities: DetectedEntity[] = [];
     for (const pattern of API_KEY_PATTERNS) {
         secretEntities.push(...matchAll(prompt, pattern, "api_key"));
@@ -190,7 +178,7 @@ export function detectRisks(
     secretEntities.push(...matchAll(prompt, BEARER_TOKEN_REGEX, "bearer_token"));
     secretEntities.push(...matchAll(prompt, PASSWORD_REGEX, "password"));
 
-    // Deduplicate overlapping matches — keep the longest span at each position
+    // Deduplicate matches
     secretEntities = deduplicateEntities(secretEntities);
 
     const hasSecrets = secretEntities.length > 0;
@@ -199,7 +187,6 @@ export function detectRisks(
         categories.push("Secrets");
     }
 
-    // ── Business-sensitive ────────────────────────────
     const businessEntities = matchKeywords(
         prompt,
         BUSINESS_KEYWORDS,
@@ -211,7 +198,6 @@ export function detectRisks(
         categories.push("Business-Sensitive");
     }
 
-    // ── Health terms ──────────────────────────────────
     let hasHealthTerms = false;
     if (policy.strictHealthTerms) {
         const healthEntities = matchKeywords(
@@ -226,7 +212,6 @@ export function detectRisks(
         }
     }
 
-    // ── Custom keywords ──────────────────────────────
     let hasCustomKeywords = false;
     if (policy.customKeywords.length > 0) {
         const customEntities = matchKeywords(
@@ -254,9 +239,7 @@ export function detectRisks(
     };
 }
 
-/**
- * Classify the overall risk level based on detection results and policy.
- */
+// Classify risk level based on detection results
 export function classifyRisk(
     result: DetectionResult,
     policy: PolicyConfig
@@ -300,9 +283,7 @@ export function classifyRisk(
     return RiskLevel.LOW;
 }
 
-/**
- * Generate a human-readable explanation of the scan findings.
- */
+// Generate explanation of scan findings
 export function generateExplanation(
     result: DetectionResult,
     riskLevel: RiskLevel

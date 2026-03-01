@@ -13,17 +13,7 @@ import { RiskLevel } from "../models/types";
 
 const prisma = new PrismaClient();
 
-/**
- * Full scan pipeline (privacy-first):
- * 1. Fetch the policy
- * 2. Run risk detection on the prompt
- * 3. Classify risk level
- * 4. Generate human-readable explanation
- * 5. Mask detected entities
- * 6. If MEDIUM/HIGH → send ONLY maskedPrompt to Gemini for rewrite
- * 7. Store a ScanEvent (SHA-256 hash only — NO raw prompt)
- * 8. Return the response
- */
+// Full scan pipeline
 export async function scanPrompt(
     prompt: string,
     policyId: string,

@@ -14,7 +14,6 @@ const api = axios.create({
     headers: { "Content-Type": "application/json" },
 });
 
-// ── JWT interceptor ─────────────────────────────────────
 
 let token: string | null = null;
 
@@ -29,7 +28,6 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// ── Auth ────────────────────────────────────────────────
 
 export async function login(
     email: string,
@@ -46,7 +44,6 @@ export async function logout(): Promise<void> {
     await api.post("/api/auth/logout");
 }
 
-// ── Scan ────────────────────────────────────────────────
 
 export async function scanPrompt(
     prompt: string,
@@ -59,7 +56,6 @@ export async function scanPrompt(
     return data;
 }
 
-// ── Policies ────────────────────────────────────────────
 
 export async function getPolicies(): Promise<PolicyDTO[]> {
     const { data } = await api.get<PolicyDTO[]>("/api/policies");
@@ -81,7 +77,6 @@ export async function updatePolicy(
     return data;
 }
 
-// ── Analytics ───────────────────────────────────────────
 
 export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
     const { data } = await api.get<AnalyticsSummary>("/api/analytics/summary");

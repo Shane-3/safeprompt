@@ -1,6 +1,5 @@
 import type { MaskingInput, MaskingOutput, DetectedEntity } from "../models/types";
 
-// ── Replacement map ─────────────────────────────────────
 
 const MASK_MAP: Record<string, string> = {
     email: "[EMAIL]",
@@ -15,18 +14,12 @@ const MASK_MAP: Record<string, string> = {
     custom_keyword: "[CUSTOM_DATA]",
 };
 
-/**
- * Return the deterministic mask token for a given entity type.
- */
+// Get deterministic mask token
 function getMaskToken(entityType: string): string {
     return MASK_MAP[entityType] ?? "[REDACTED]";
 }
 
-/**
- * Deduplicate entities that share overlapping spans.
- * When two entities overlap, the longer (or earlier-detected) one wins.
- * Returns entities sorted by position descending (for safe right-to-left replacement).
- */
+// Deduplicate overlapping entities
 function deduplicateAndSort(entities: DetectedEntity[]): DetectedEntity[] {
     // Sort ascending by position first, then descending by value length (longer wins)
     const sorted = [...entities].sort((a, b) => {
@@ -51,12 +44,7 @@ function deduplicateAndSort(entities: DetectedEntity[]): DetectedEntity[] {
     return result.reverse();
 }
 
-/**
- * Replace all detected sensitive spans with deterministic mask tokens.
- *
- * Entities are processed right-to-left so earlier character indices
- * remain valid after each replacement.
- */
+// Replace sensitive spans with mask tokens
 export function maskPrompt(input: MaskingInput): MaskingOutput {
     if (input.detectedEntities.length === 0) {
         return { maskedPrompt: input.originalPrompt };

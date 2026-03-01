@@ -1,4 +1,3 @@
-// ── Enums ───────────────────────────────────────────────
 
 export enum Role {
     USER = "USER",
@@ -11,7 +10,6 @@ export enum RiskLevel {
     HIGH = "HIGH",
 }
 
-// ── Scan ────────────────────────────────────────────────
 
 export interface DetectedEntity {
     type: string;
@@ -27,7 +25,6 @@ export interface ScanResponse {
     suggestedRewrite: string | null;
 }
 
-// ── Policy ──────────────────────────────────────────────
 
 export interface PolicyDTO {
     id: string;
@@ -56,7 +53,6 @@ export interface UpdatePolicyInput {
     customKeywords?: string[];
 }
 
-// ── Analytics ───────────────────────────────────────────
 
 export interface RiskDistribution {
     LOW: number;
@@ -82,7 +78,6 @@ export interface TimelineDataPoint {
     HIGH: number;
 }
 
-// ── Auth ────────────────────────────────────────────────
 
 export interface AuthUser {
     id: string;

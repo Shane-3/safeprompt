@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { DetectedEntity } from "../../models/types";
 
-// ── Mock Prisma ─────────────────────────────────────────
 
 const mockPolicy = {
     id: "policy-1",
@@ -26,14 +25,12 @@ vi.mock("@prisma/client", () => {
     };
 });
 
-// ── Mock GeminiService ──────────────────────────────────
 
 const mockRewriteWithGemini = vi.fn().mockResolvedValue("Rewritten safely");
 vi.mock("../geminiService", () => ({
     rewriteWithGemini: (...args: unknown[]) => mockRewriteWithGemini(...args),
 }));
 
-// ── Import after mocks ─────────────────────────────────
 
 const { scanPrompt } = await import("../scanService");
 
@@ -65,7 +62,7 @@ describe("ScanService — Privacy-First Flow", () => {
         expect(result.riskLevel).not.toBe("LOW");
         expect(mockRewriteWithGemini).toHaveBeenCalledTimes(1);
 
-        // First arg to rewriteWithGemini should be the MASKED prompt
+        // Assert masked prompt format
         const maskedArg = mockRewriteWithGemini.mock.calls[0][0] as string;
         expect(maskedArg).not.toContain("john@test.com");
         expect(maskedArg).toContain("[EMAIL]");
@@ -102,12 +99,12 @@ describe("ScanService — Privacy-First Flow", () => {
         const createArg = mockCreate.mock.calls[0][0] as { data: Record<string, unknown> };
         const data = createArg.data;
 
-        // Must have promptHash (a hex SHA-256)
+        // Assert SHA-256 hash formatting
         expect(data.promptHash).toBeDefined();
         expect(typeof data.promptHash).toBe("string");
         expect((data.promptHash as string).length).toBe(64); // SHA-256 hex length
 
-        // Must NOT have any raw prompt field
+        // Ensure no raw prompt leaks
         expect(data).not.toHaveProperty("prompt");
         expect(data).not.toHaveProperty("rawPrompt");
         expect(data).not.toHaveProperty("originalPrompt");
